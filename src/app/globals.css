@@ -43,3 +43,24 @@ body {
 .animate-fade-in {
   animation: fade-in 0.35s ease both;
 }
+
+/* Route change: content rises into place instead of snapping in. */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-page-in {
+  animation: page-in 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-page-in {
+    animation: fade-in 0.2s ease both;
+  }
+}
