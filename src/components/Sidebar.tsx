@@ -19,12 +19,8 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile: fixed top bar — wordmark left, hamburger right. */}
-      <header
-        className={`fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between px-6 md:hidden ${
-          onInfo ? "bg-transparent text-white" : "bg-background"
-        }`}
-      >
+      {/* Mobile: fixed top bar — wordmark left, hamburger right. Liquid-glass: blurred white on every route. */}
+      <header className="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between border-b border-white/40 bg-white/60 px-6 text-foreground backdrop-blur-xl backdrop-saturate-150 md:hidden">
         <Link href="/" onClick={() => setOpen(false)} className="text-lg font-bold tracking-tight">
           {site.name}
         </Link>
@@ -38,22 +34,22 @@ export default function Sidebar() {
         >
           <span className="relative block h-4 w-6">
             <span
-              className={`absolute left-0 block h-px w-6 transition-transform duration-300 ${
-                onInfo ? "bg-white" : "bg-foreground"
-              } ${open ? "top-2 rotate-45" : "top-0.5"}`}
+              className={`absolute left-0 block h-px w-6 bg-foreground transition-transform duration-300 ${
+                open ? "top-2 rotate-45" : "top-0.5"
+              }`}
             />
             <span
-              className={`absolute left-0 block h-px w-6 transition-transform duration-300 ${
-                onInfo ? "bg-white" : "bg-foreground"
-              } ${open ? "top-2 -rotate-45" : "top-3"}`}
+              className={`absolute left-0 block h-px w-6 bg-foreground transition-transform duration-300 ${
+                open ? "top-2 -rotate-45" : "top-3"
+              }`}
             />
           </span>
         </button>
       </header>
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-full flex-col px-6 pt-20 pb-6 transition-transform md:w-64 md:translate-x-0 md:px-6 md:pt-36 md:pb-10 ${
-          onInfo ? "bg-transparent text-white" : "bg-background"
+        className={`fixed inset-y-0 left-0 z-40 flex w-full flex-col bg-white/70 px-6 pt-20 pb-6 text-foreground backdrop-blur-xl backdrop-saturate-150 transition-transform md:w-64 md:translate-x-0 md:px-6 md:pt-36 md:pb-10 md:backdrop-blur-none md:backdrop-saturate-100 ${
+          onInfo ? "md:bg-transparent md:text-white" : "md:bg-background"
         } ${open ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
       >
         <div>
@@ -78,7 +74,7 @@ export default function Sidebar() {
                     active
                       ? NAV_ACTIVE_COLOR[item.href]
                       : onInfo
-                        ? "text-white hover:text-white/70"
+                        ? "text-foreground hover:text-muted md:text-white md:hover:text-white/70"
                         : "text-foreground hover:text-muted"
                   }
                 >
@@ -89,9 +85,9 @@ export default function Sidebar() {
           </nav>
         </div>
 
-        <div className={`pt-12 text-xs ${onInfo ? "text-white/70" : "text-muted"}`}>
+        <div className={`pt-12 text-xs text-muted ${onInfo ? "md:text-white/70" : ""}`}>
           <p className="max-w-[14rem] leading-relaxed">{site.copyright}</p>
-          <ul className={`mt-4 flex gap-4 ${onInfo ? "text-white" : "text-foreground"}`}>
+          <ul className={`mt-4 flex gap-4 text-foreground ${onInfo ? "md:text-white" : ""}`}>
             {site.socials.map((s) => (
               <li key={s.label}>
                 <a
@@ -99,7 +95,7 @@ export default function Sidebar() {
                   target="_blank"
                   rel="noreferrer"
                   aria-label={s.label}
-                  className={`block ${onInfo ? "hover:text-white/70" : "hover:text-muted"}`}
+                  className={`block hover:text-muted ${onInfo ? "md:hover:text-white/70" : ""}`}
                 >
                   <SocialIcon name={s.icon} />
                 </a>
