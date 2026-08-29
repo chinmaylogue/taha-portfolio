@@ -18,7 +18,7 @@ export default function Gallery({ items }: { items: MediaItem[] }) {
     <>
       <HorizontalScroller
         disabled={active !== null}
-        className="gap-3 px-6 pt-20 pb-6 md:gap-4 md:px-10 md:pt-20 md:pb-10"
+        className="gap-3 px-6 pt-20 pb-6 md:gap-4 md:px-6 md:pt-36 md:pb-36"
       >
         {items.map((item) => {
           const aspect = item.kind === "video" ? ASPECT[item.format ?? "reel"] : (item.ratio ?? 1.3);
@@ -50,12 +50,12 @@ export default function Gallery({ items }: { items: MediaItem[] }) {
             <figure
               key={item.id}
               style={{ aspectRatio: aspect }}
-              className="group relative h-full shrink-0"
+              className="group relative h-full shrink-0 overflow-hidden"
             >
               <Media
                 src={item.src}
                 alt={item.caption ?? "Photograph"}
-                className="h-full w-full select-none"
+                className="h-full w-full select-none transition-transform duration-500 group-hover:scale-[1.02]"
               />
               {item.caption && (
                 <figcaption className="absolute bottom-3 left-3 bg-white/85 px-2 py-1 text-xs opacity-0 transition-opacity duration-300 group-hover:opacity-100">

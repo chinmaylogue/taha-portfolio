@@ -23,17 +23,16 @@ export const site = {
   email: "tahamalak@gmail.com",
   copyright: `© ${new Date().getFullYear()} Taha Malak. All Rights Reserved.`,
   socials: [
-    { label: "Instagram", href: "https://instagram.com/", short: "ig" },
-    { label: "Vimeo", href: "https://vimeo.com/", short: "vm" },
-    { label: "X", href: "https://x.com/", short: "x" },
-  ],
+    { label: "Instagram", href: "https://instagram.com/", icon: "instagram" },
+    { label: "LinkedIn", href: "https://linkedin.com/", icon: "linkedin" },
+    { label: "Spotify", href: "https://open.spotify.com/", icon: "spotify" },
+  ] as const,
 };
 
 export const nav = [
   { label: "Work", href: "/" },
   { label: "Editorial", href: "/editorial" },
   { label: "Info", href: "/info" },
-  { label: "Contact", href: "/contact" },
 ];
 
 /**
