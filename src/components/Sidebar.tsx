@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { nav, site } from "@/data/content";
 import SocialIcon from "./SocialIcon";
+import { SoundToggle } from "./BackgroundMusic";
 
 const NAV_ACTIVE_COLOR: Record<string, string> = {
   "/": "text-blue-600",
@@ -21,9 +22,12 @@ export default function Sidebar() {
     <>
       {/* Mobile: fixed top bar — wordmark left, hamburger right. Liquid-glass: blurred white on every route. */}
       <header className="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between border-b border-white/40 bg-white/60 px-6 text-foreground backdrop-blur-xl backdrop-saturate-150 md:hidden">
-        <Link href="/" onClick={() => setOpen(false)} className="text-lg font-bold tracking-tight">
-          {site.name}
-        </Link>
+        <div className="flex items-center gap-2.5">
+          <Link href="/" onClick={() => setOpen(false)} className="text-lg font-bold tracking-tight">
+            {site.name}
+          </Link>
+          <SoundToggle />
+        </div>
 
         <button
           type="button"
@@ -54,13 +58,12 @@ export default function Sidebar() {
       >
         <div>
           {/* Desktop wordmark; the mobile one lives in the top bar. */}
-          <Link
-            href="/"
-            onClick={() => setOpen(false)}
-            className="hidden text-2xl font-bold tracking-tight md:block"
-          >
-            {site.name}
-          </Link>
+          <div className="hidden items-center gap-3 md:flex">
+            <Link href="/" onClick={() => setOpen(false)} className="text-2xl font-bold tracking-tight">
+              {site.name}
+            </Link>
+            <SoundToggle />
+          </div>
 
           <nav className="flex flex-col gap-0.5 text-[13px] leading-tight md:mt-10">
             {nav.map((item) => {
@@ -69,6 +72,7 @@ export default function Sidebar() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  data-cursor="negative"
                   onClick={() => setOpen(false)}
                   className={
                     active
