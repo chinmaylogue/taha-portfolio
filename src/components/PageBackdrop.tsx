@@ -12,12 +12,15 @@ import { usePathname } from "next/navigation";
  * Work/Editorial will get BackgroundVideo (see that component) once the
  * real background.m3u8 + segments are in place — wire it back in here.
  */
-export default function PageBackdrop() {
+export default function PageBackdrop({ infoBackground }: { infoBackground: string }) {
   const pathname = usePathname();
 
-  if (pathname === "/info") {
+  if (pathname === "/info" && infoBackground) {
     return (
-      <div className="fixed inset-0 -z-10 bg-[url('/media/info/info_bg.jpeg')] bg-cover bg-center bg-no-repeat" />
+      <div
+        className="fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${JSON.stringify(infoBackground)})` }}
+      />
     );
   }
 

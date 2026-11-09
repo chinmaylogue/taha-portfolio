@@ -1,7 +1,8 @@
 import Gallery from "@/components/Gallery";
-import { editorial } from "@/data/content";
+import { getContent } from "@/lib/cms/store";
 
-export default function EditorialPage() {
+export default async function EditorialPage() {
+  const { editorial } = await getContent();
   return (
     <div className="h-full">
       <Gallery items={editorial} />

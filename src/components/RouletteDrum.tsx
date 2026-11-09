@@ -5,7 +5,16 @@ import type { MediaItem } from "@/data/content";
 import { useSound } from "./BackgroundMusic";
 import VideoPreview from "./VideoPreview";
 
-type Props = { items: MediaItem[] };
+type Props = {
+  items: MediaItem[];
+  /** Item to land on when the drum spins in (default: random). */
+  startAt?: number;
+  /**
+   * Full-screen film preview mode: bigger drum, the front film plays with
+   * sound, and clicking it doesn't open another preview.
+   */
+  inPreview?: boolean;
+};
 
 const SPIN_MS = 2400;
 const MIN_TURNS = 2; // full revolutions before landing
@@ -13,6 +22,15 @@ const MIN_FACES = 8; // short galleries repeat round the drum so it still reads 
 const thumb = (item: MediaItem) => (item.kind === "video" ? (item.poster ?? "") : item.src);
 // easeOutQuart — fast whip, long glide into the slot.
 const ease = (t: number) => 1 - Math.pow(1 - t, 4);
+
+/** Start playback with sound; if the browser blocks that, play muted instead. */
+function playWithSound(v: HTMLVideoElement | null) {
+  if (!v) return;
+  void v.play().catch(() => {
+    v.muted = true;
+    void v.play().catch(() => {});
+  });
+}
 
 /** Plays a short mechanical tick — a chamber passing the barrel. */
 function tick(ctx: AudioContext) {
@@ -34,7 +52,7 @@ function tick(ctx: AudioContext) {
  * a random chamber; ‹ › (arrow keys, swipe) turn it to the neighbouring one,
  * and clicking a side panel turns it to that panel.
  */
-export default function RouletteDrum({ items }: Props) {
+export default function RouletteDrum({ items, startAt, inPreview = false }: Props) {
   const n = items.length;
   const faces = n * Math.max(1, Math.ceil(MIN_FACES / n));
   const step = 360 / faces;
@@ -44,6 +62,8 @@ export default function RouletteDrum({ items }: Props) {
   const [preview, setPreview] = useState<number | null>(null);
   const videos = items.filter((it) => it.kind === "video");
   const [spinning, setSpinning] = useState(false);
+  // Preview mode: whether the front film is currently paused (shows a ▶).
+  const [paused, setPaused] = useState(false);
   const [size, setSize] = useState({ w: 0, h: 0 });
 
   const stageRef = useRef<HTMLDivElement>(null);
@@ -58,7 +78,7 @@ export default function RouletteDrum({ items }: Props) {
   }, [soundOn]);
 
   // Face width and drum radius follow the stage size.
-  const faceW = size.w * (size.w < 700 ? 0.78 : 0.5);
+  const faceW = size.w * (size.w < 700 ? 0.78 : inPreview ? 0.46 : 0.5);
   const radius = faceW / 2 / Math.tan(Math.PI / faces);
 
   useEffect(() => {
@@ -140,13 +160,13 @@ export default function RouletteDrum({ items }: Props) {
   useEffect(() => {
     if (opened.current || !size.w) return;
     opened.current = true;
-    const target = Math.floor(Math.random() * faces);
+    const target = startAt ?? Math.floor(Math.random() * faces);
     const to = -target * step;
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     angleRef.current = still ? to : to + MIN_TURNS * 360 + step * Math.floor(Math.random() * faces);
     paint(angleRef.current);
     rotate(to, () => setFace(target), still ? 1 : SPIN_MS);
-  }, [size.w, faces, step, paint, rotate]);
+  }, [size.w, faces, step, startAt, paint, rotate]);
 
   // Keep the drum in place when the stage resizes.
   useEffect(() => {
@@ -182,7 +202,9 @@ export default function RouletteDrum({ items }: Props) {
     <section
       aria-roledescription="carousel"
       aria-label="Gallery"
-      className="flex h-full flex-col items-center justify-center overflow-hidden px-4 pt-20 pb-6 md:px-10 md:pt-24 md:pb-10"
+      className={`flex h-full flex-col items-center justify-center overflow-hidden px-4 md:px-10 ${
+        inPreview ? "pt-14 pb-4" : "pt-20 pb-6 md:pt-24 md:pb-10"
+      }`}
     >
       <div
         ref={stageRef}
@@ -194,7 +216,9 @@ export default function RouletteDrum({ items }: Props) {
           if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
         }}
         style={{ perspective: `${Math.max(1200, radius * 2.2)}px` }}
-        className="relative h-[62vh] w-full max-w-6xl touch-pan-y select-none md:h-[66vh]"
+        className={`relative w-full touch-pan-y select-none ${
+          inPreview ? "h-[68vh] max-w-7xl md:h-[74vh]" : "h-[62vh] max-w-6xl md:h-[66vh]"
+        }`}
       >
         <div
           ref={drumRef}
@@ -213,9 +237,19 @@ export default function RouletteDrum({ items }: Props) {
                   onClick={
                     rel !== 0
                       ? () => go(rel)
-                      : it.kind === "video" && !spinning
-                        ? () => setPreview(videos.findIndex((v) => v.id === it.id))
-                        : undefined
+                      : it.kind !== "video" || spinning
+                        ? undefined
+                        : inPreview
+                          ? (e) => {
+                              // Click the film: play with sound, or pause if it's already playing.
+                              const v = e.currentTarget.querySelector("video");
+                              if (!v) return;
+                              if (v.paused || v.muted) {
+                                v.muted = false;
+                                playWithSound(v);
+                              } else v.pause();
+                            }
+                          : () => setPreview(videos.findIndex((v) => v.id === it.id))
                   }
                   style={{
                     width: faceW,
@@ -229,12 +263,15 @@ export default function RouletteDrum({ items }: Props) {
                   {live && it.kind === "video" ? (
                     <video
                       key={it.id}
+                      ref={inPreview ? playWithSound : undefined}
                       src={it.src}
                       poster={it.poster}
                       autoPlay
-                      muted
+                      muted={!inPreview}
                       loop
                       playsInline
+                      onPlay={() => setPaused(false)}
+                      onPause={() => setPaused(true)}
                       className="h-full w-full object-cover"
                     />
                   ) : (
@@ -246,6 +283,16 @@ export default function RouletteDrum({ items }: Props) {
                       // Films fill their panel (no letterbox bars); photos show whole.
                       className={`h-full w-full ${it.kind === "video" ? "object-cover" : "object-contain"}`}
                     />
+                  )}
+                  {live && inPreview && it.kind === "video" && paused && (
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute inset-0 flex items-center justify-center"
+                    >
+                      <span className="flex h-20 w-20 items-center justify-center rounded-full bg-black/55 pl-1.5 text-3xl text-white backdrop-blur-sm">
+                        ▶
+                      </span>
+                    </span>
                   )}
                 </div>
               );
@@ -284,7 +331,7 @@ export default function RouletteDrum({ items }: Props) {
         </button>
       </div>
       {preview !== null && (
-        <VideoPreview items={videos} index={preview} onChange={setPreview} onClose={closePreview} />
+        <VideoPreview items={videos} index={preview} onClose={closePreview} />
       )}
     </section>
   );

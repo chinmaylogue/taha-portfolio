@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { nav, site } from "@/data/content";
+import { formatCopyright, nav, type SiteSettings } from "@/data/content";
 import SocialIcon from "./SocialIcon";
 import { SoundToggle } from "./BackgroundMusic";
 
@@ -13,7 +13,7 @@ const NAV_ACTIVE_COLOR: Record<string, string> = {
   "/info": "text-green-600",
 };
 
-export default function Sidebar() {
+export default function Sidebar({ site }: { site: SiteSettings }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const onInfo = pathname === "/info";
@@ -90,7 +90,7 @@ export default function Sidebar() {
         </div>
 
         <div className={`pt-12 text-xs text-muted ${onInfo ? "md:text-white/70" : ""}`}>
-          <p className="max-w-[14rem] leading-relaxed">{site.copyright}</p>
+          <p className="max-w-[14rem] leading-relaxed">{formatCopyright(site.copyright)}</p>
           <ul className={`mt-4 flex gap-4 text-foreground ${onInfo ? "md:text-white" : ""}`}>
             {site.socials.map((s) => (
               <li key={s.label}>

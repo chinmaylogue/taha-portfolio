@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { site } from "@/data/content";
 
 const glass =
   "border border-white/40 bg-white/20 backdrop-blur-xl backdrop-saturate-150 shadow-[0_8px_32px_rgba(0,0,0,0.12)] outline-none placeholder:text-white/70 focus:border-white/80 focus:bg-white/30";
 
-export default function ContactForm() {
+export default function ContactForm({ email }: { email: string }) {
   const [sent, setSent] = useState(false);
 
   // No backend yet — hands the message off to the visitor's mail client.
@@ -15,7 +14,7 @@ export default function ContactForm() {
     const data = new FormData(e.currentTarget);
     const subject = `Inquiry from ${data.get("name")}`;
     const body = `${data.get("message")}\n\n— ${data.get("name")} (${data.get("email")})`;
-    window.location.href = `mailto:${site.email}?subject=${encodeURIComponent(
+    window.location.href = `mailto:${email}?subject=${encodeURIComponent(
       subject
     )}&body=${encodeURIComponent(body)}`;
     setSent(true);

@@ -2,7 +2,6 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 
-const SRC = "/media/audio/ambient.wav";
 const VOLUME = 0.35;
 const STORAGE_KEY = "bg-music-muted";
 /** Fired by the video lightbox so the music steps aside while a film plays. */
@@ -25,7 +24,7 @@ function readMuted() {
  * Looping ambient soundtrack with an on/off toggle. Browsers block audio until
  * the visitor interacts, so playback starts on the first click/tap/key press.
  */
-export default function BackgroundMusic({ children }: { children: ReactNode }) {
+export default function BackgroundMusic({ src, children }: { src: string; children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const fadeRef = useRef<number | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -65,7 +64,7 @@ export default function BackgroundMusic({ children }: { children: ReactNode }) {
 
   // Start on first interaction unless the visitor has muted before.
   useEffect(() => {
-    if (playing) return;
+    if (playing || !src) return;
     const kick = () => {
       if (!readMuted()) start();
     };
@@ -76,7 +75,7 @@ export default function BackgroundMusic({ children }: { children: ReactNode }) {
       window.removeEventListener("pointerdown", kick);
       window.removeEventListener("keydown", kick);
     };
-  }, [playing, start]);
+  }, [playing, start, src]);
 
   // Duck while a video with its own sound is open.
   useEffect(() => {
@@ -100,7 +99,7 @@ export default function BackgroundMusic({ children }: { children: ReactNode }) {
 
   return (
     <SoundContext.Provider value={{ on: playing, toggle }}>
-      <audio ref={audioRef} src={SRC} loop preload="auto" />
+      {src && <audio ref={audioRef} src={src} loop preload="auto" />}
       {children}
     </SoundContext.Provider>
   );

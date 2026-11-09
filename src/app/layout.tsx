@@ -1,31 +1,16 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Sidebar from "@/components/Sidebar";
-import PageTransition from "@/components/PageTransition";
-import PageBackdrop from "@/components/PageBackdrop";
-import BackgroundMusic from "@/components/BackgroundMusic";
-import CursorPreview from "@/components/CursorPreview";
-import NegativeCursor from "@/components/NegativeCursor";
 
 export const metadata: Metadata = {
   title: "Taha Malak — Photographer & Director",
   description: "Selected photography and film work by Taha Malak.",
 };
 
+/** Bare document shell — the public site chrome lives in (site)/layout, the CMS in admin/layout. */
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="h-full">
-      <body className="h-full">
-        <BackgroundMusic>
-          <PageBackdrop />
-          <Sidebar />
-          <main className="h-full md:pl-64">
-            <PageTransition>{children}</PageTransition>
-          </main>
-          <CursorPreview />
-          <NegativeCursor />
-        </BackgroundMusic>
-      </body>
+      <body className="h-full">{children}</body>
     </html>
   );
 }

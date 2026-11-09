@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Taha Malak — Portfolio
 
-## Getting Started
-
-First, run the development server:
+Next.js 16 portfolio with a built-in CMS at **`/admin`**.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev   # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## CMS
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Everything visitors see — Work films, Editorial photos, the Info page, site name,
+email, socials, background music, SEO — is edited at `/admin` and goes live when
+you hit **Publish** (⌘S).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Setup
 
-## Learn More
+Create `.env.local`:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+ADMIN_PASSWORD=choose-a-long-password
+# Optional: sign sessions with a separate secret so changing the password doesn't log you out
+# AUTH_SECRET=random-32+-char-string
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Restart `npm run dev` and sign in at http://localhost:3000/admin.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Where content is stored
 
-## Deploy on Vercel
+| Mode | When | Content | Uploads |
+| --- | --- | --- | --- |
+| **Local** | no `BLOB_READ_WRITE_TOKEN` | `content/site.json` | `public/uploads/` |
+| **Vercel Blob** | `BLOB_READ_WRITE_TOKEN` is set | versioned JSON in Blob (last 20 kept, see *History* tab) | Blob |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Local** is for editing in `next dev`. Commit `content/site.json` and
+  `public/uploads/` to ship your changes.
+- **On Vercel**, the filesystem is read-only, so connect Blob storage to edit
+  the live site: Vercel project → *Storage* → *Create* → *Blob* → connect to the
+  project (this adds `BLOB_READ_WRITE_TOKEN`), add `ADMIN_PASSWORD` under
+  *Settings → Environment Variables*, then redeploy. Uploads go straight from the
+  browser to Blob, so large videos aren't limited by the 4.5 MB function body cap.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Until the first publish, the site serves the seed content in `src/data/content.ts`.
+
+### Code map
+
+- `src/app/(site)/` — public pages; read content via `getContent()`
+- `src/app/admin/` — editor UI and Server Functions (`actions.ts`)
+- `src/app/api/admin/upload/route.ts` — upload endpoint
+- `src/lib/cms/store.ts` — storage (local / Blob)
+- `src/lib/cms/schema.ts` — validation applied to every save
+- `src/lib/cms/session.ts`, `auth.ts`, `src/proxy.ts` — password login + signed session cookie
