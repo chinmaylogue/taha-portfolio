@@ -117,13 +117,13 @@ export default function NegativeCursor() {
           transform: "scale(0)",
           boxShadow: "0 0 0 1px rgba(0,0,0,0.08), 0 8px 28px rgba(0,0,0,0.18)",
         }}
-        className="pointer-events-none fixed top-0 left-0 z-[46] hidden rounded-full will-change-transform md:block"
+        className="pointer-events-none fixed top-0 left-0 z-[60] hidden rounded-full will-change-transform md:block"
       />
       <div
         ref={lensRef}
         aria-hidden
         style={{ clipPath: "circle(0px at -999px -999px)" }}
-        className="pointer-events-none fixed inset-0 z-[46] hidden bg-white md:block"
+        className="pointer-events-none fixed inset-0 z-[60] hidden bg-white md:block"
       >
         <span
           ref={textRef}

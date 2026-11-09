@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MediaItem } from "@/data/content";
 import { useSound } from "./BackgroundMusic";
+import VideoPreview from "./VideoPreview";
 
 type Props = { items: MediaItem[] };
 
@@ -39,6 +40,9 @@ export default function RouletteDrum({ items }: Props) {
   const step = 360 / faces;
 
   const [face, setFace] = useState(0);
+  // Index into `videos` while the film preview is open.
+  const [preview, setPreview] = useState<number | null>(null);
+  const videos = items.filter((it) => it.kind === "video");
   const [spinning, setSpinning] = useState(false);
   const [size, setSize] = useState({ w: 0, h: 0 });
 
@@ -160,13 +164,16 @@ export default function RouletteDrum({ items }: Props) {
   );
 
   useEffect(() => {
+    if (preview !== null) return; // the preview owns the keys while open
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight") go(1);
       if (e.key === "ArrowLeft") go(-1);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [go]);
+  }, [go, preview]);
+
+  const closePreview = useCallback(() => setPreview(null), []);
 
   const swipeX = useRef<number | null>(null);
   const item = items[face % n];
@@ -203,7 +210,13 @@ export default function RouletteDrum({ items }: Props) {
               return (
                 <div
                   key={f}
-                  onClick={rel === 0 ? undefined : () => go(rel)}
+                  onClick={
+                    rel !== 0
+                      ? () => go(rel)
+                      : it.kind === "video" && !spinning
+                        ? () => setPreview(videos.findIndex((v) => v.id === it.id))
+                        : undefined
+                  }
                   style={{
                     width: faceW,
                     left: (size.w - faceW) / 2,
@@ -211,7 +224,7 @@ export default function RouletteDrum({ items }: Props) {
                     backfaceVisibility: "hidden",
                     filter: spinning ? "blur(var(--blur, 0px))" : undefined,
                   }}
-                  className={`absolute inset-y-0 ${rel === 0 ? "" : "cursor-pointer"}`}
+                  className={`absolute inset-y-0 ${rel !== 0 || it.kind === "video" ? "cursor-pointer" : ""}`}
                 >
                   {live && it.kind === "video" ? (
                     <video
@@ -270,6 +283,9 @@ export default function RouletteDrum({ items }: Props) {
           ›
         </button>
       </div>
+      {preview !== null && (
+        <VideoPreview items={videos} index={preview} onChange={setPreview} onClose={closePreview} />
+      )}
     </section>
   );
 }
